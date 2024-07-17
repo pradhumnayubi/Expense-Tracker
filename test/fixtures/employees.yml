@@ -1,0 +1,17 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: MyString
+  email: MyString
+  department: one
+  employment_status: MyString
+  created_at: 2024-07-16 12:39:33
+  updated_at: 2024-07-16 12:39:33
+
+two:
+  name: MyString
+  email: MyString
+  department: two
+  employment_status: MyString
+  created_at: 2024-07-16 12:39:33
+  updated_at: 2024-07-16 12:39:33
