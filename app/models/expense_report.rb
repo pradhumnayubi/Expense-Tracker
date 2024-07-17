@@ -2,5 +2,5 @@ class ExpenseReport < ApplicationRecord
   belongs_to :employee
   has_many :expenses
 
-  validates :status, presence: true
+  validates :status, :employee_id , presence: true
 end

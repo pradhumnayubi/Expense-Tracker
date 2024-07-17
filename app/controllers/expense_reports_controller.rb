@@ -1,6 +1,6 @@
 # app/controllers/expense_reports_controller.rb
 class ExpenseReportsController < ApplicationController
-  before_action :set_expense_report, only: [:show, :update, :destroy]
+  before_action :set_expense_report, only: [:show, :update, :destroy, :approve_valid_expenses]
 
   # GET /expense_reports
   def index
@@ -36,6 +36,29 @@ class ExpenseReportsController < ApplicationController
   # DELETE /expense_reports/:id
   def destroy
     @expense_report.destroy
+  end
+
+  def approve_valid_expenses
+    @expenses = @expense_report.expenses
+
+    @expenses.each do |expense|
+      employee = expense.employee
+      if employee.employment_status == 'active'
+        validation = InvoiceValidator.validate(expense.invoice_number)
+        if validation['status']
+          expense.update(status: 'approved')
+        else
+          expense.update(status: 'rejected')
+        end
+      else
+        @expense_report.update(status: 'rejected')
+        expense.update(status: 'rejected')
+      end
+    end
+
+    @expense_report.update(status: 'approved')
+
+    render json: @expense_report.expenses
   end
 
   private
