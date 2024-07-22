@@ -1,6 +1,7 @@
 # app/controllers/expense_reports_controller.rb
 class ExpenseReportsController < ApplicationController
   before_action :set_expense_report, only: [:show, :update, :destroy, :approve_valid_expenses]
+  before_action :authenticate_admin!, only: [:approve_valid_expenses]
 
   # GET /expense_reports
   def index
@@ -68,6 +69,13 @@ class ExpenseReportsController < ApplicationController
   end
 
   def expense_report_params
-    params.require(:expense_report).permit(:employee_id, :status, :comments)
+    params.require(:expense_report).permit(:employee_id, :comments)
+  end
+
+  def authenticate_admin!
+    employee = Employee.find(params[:employee_id])
+    unless employee.role == 'ADMIN'
+      render json: { error: 'Access denied' }, status: :unauthorized
+    end
   end
 end

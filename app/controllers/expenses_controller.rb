@@ -1,5 +1,6 @@
 class ExpensesController < ApplicationController
   before_action :set_expense, only: [:show, :update, :destroy]
+  before_action :authenticate_admin!, only: [:approve_expense]
 
   def index
     @expenses = Expense.all
@@ -48,6 +49,21 @@ class ExpensesController < ApplicationController
     render json: @expenses
   end
 
+  def approve_expense
+    employee = expense.employee
+      if employee.employment_status == 'active'
+        validation = InvoiceValidator.validate(expense.invoice_number)
+        if validation['status']
+          expense.update(status: 'approved')
+        else
+          expense.update(status: 'rejected')
+        end
+      else
+        @expense_report.update(status: 'rejected')
+        expense.update(status: 'rejected')
+      end
+  end
+  
   private
 
   def set_expense
@@ -56,5 +72,12 @@ class ExpensesController < ApplicationController
 
   def expense_params
     params.require(:expense).permit(:employee_id, :expense_report_id, :date, :description, :amount, :invoice_number, :supporting_document)
+  end
+
+  def authenticate_admin!
+    employee = Employee.find(params[:employee_id])
+    unless employee.role == 'ADMIN'
+      render json: { error: 'Access denied' }, status: :unauthorized
+    end
   end
 end

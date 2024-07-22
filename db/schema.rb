@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_16_070935) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_22_070836) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -18,6 +18,19 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_16_070935) do
     t.string "email"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "comments", force: :cascade do |t|
+    t.bigint "employee_id", null: false
+    t.text "content", null: false
+    t.bigint "parent_id"
+    t.string "commentable_type", null: false
+    t.bigint "commentable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["commentable_type", "commentable_id"], name: "index_comments_on_commentable"
+    t.index ["employee_id"], name: "index_comments_on_employee_id"
+    t.index ["parent_id"], name: "index_comments_on_parent_id"
   end
 
   create_table "departments", force: :cascade do |t|
@@ -33,15 +46,17 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_16_070935) do
     t.string "employment_status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "role", default: "NON_ADMIN", null: false
     t.index ["department_id"], name: "index_employees_on_department_id"
   end
 
   create_table "expense_reports", force: :cascade do |t|
     t.bigint "employee_id", null: false
     t.string "status"
-    t.text "comments"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "comments_id"
+    t.index ["comments_id"], name: "index_expense_reports_on_comments_id"
     t.index ["employee_id"], name: "index_expense_reports_on_employee_id"
   end
 
@@ -56,10 +71,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_16_070935) do
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "comments_id"
+    t.index ["comments_id"], name: "index_expenses_on_comments_id"
     t.index ["employee_id"], name: "index_expenses_on_employee_id"
     t.index ["expense_report_id"], name: "index_expenses_on_expense_report_id"
   end
 
+  add_foreign_key "comments", "comments", column: "parent_id"
+  add_foreign_key "comments", "employees"
   add_foreign_key "employees", "departments"
   add_foreign_key "expense_reports", "employees"
   add_foreign_key "expenses", "employees"
