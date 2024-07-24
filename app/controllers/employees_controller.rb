@@ -1,6 +1,7 @@
 # app/controllers/employees_controller.rb
 class EmployeesController < ApplicationController
   before_action :set_employee, only: [:show, :update, :destroy]
+  before_action :authenticate_admin!, only: [:update, :destroy]
 
   # GET /employees
   def index
@@ -45,6 +46,13 @@ class EmployeesController < ApplicationController
   end
 
   def employee_params
-    params.require(:employee).permit(:name, :email, :department_id, :employment_status)
+    params.require(:employee).permit(:name, :email, :department_id, :employment_status, :role)
+  end
+
+  def authenticate_admin!
+    employee = Employee.find(params[:employee_id])
+    unless employee.role == 'ADMIN'
+      render json: { error: 'Access denied' }, status: :unauthorized
+    end
   end
 end
