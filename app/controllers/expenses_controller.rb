@@ -13,6 +13,11 @@ class ExpensesController < ApplicationController
 
   def create
     @expense = Expense.new(expense_params)
+    @employee = Employee.find(@expense.employee_id)
+    if @employee.employment_status == 'inactive'
+      render json: { error: 'Terminated employees cannot submit expenses' }, status: :unprocessable_entity
+      return
+    end
     if @expense.expense_report_id.nil? || !ExpenseReport.exists?(@expense.expense_report_id)
       new_expense_report = ExpenseReport.create(employee_id: @expense.employee_id, status: 'pending')
       @expense.expense_report_id = new_expense_report.id
