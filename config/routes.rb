@@ -17,6 +17,7 @@ Rails.application.routes.draw do
     end
   end
   resources :admins
+  resources :comments
 
   # Defines the root path route ("/")
   # root "posts#index"
